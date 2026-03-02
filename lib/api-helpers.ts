@@ -50,7 +50,7 @@ export function buildPaginationMeta(
 // Handle common errors in API routes
 export function handleError(error: unknown) {
   if (error instanceof ZodError) {
-    const messages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+    const messages = error.issues.map((issue) => `${String(issue.path.join("."))}: ${issue.message}`);
     return fail("Dữ liệu không hợp lệ", 422, messages.join("; "));
   }
 

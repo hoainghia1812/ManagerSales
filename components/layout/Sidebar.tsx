@@ -11,6 +11,7 @@ import {
   BarChart3,
   Warehouse,
   Tag,
+  Code2,
   X,
 } from "lucide-react";
 
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/customers", label: "Khách hàng", icon: Users },
   { href: "/inventory", label: "Kho hàng", icon: Warehouse },
   { href: "/revenue", label: "Doanh thu", icon: BarChart3 },
+  { href: "/api-explorer", label: "API Explorer", icon: Code2 },
 ];
 
 

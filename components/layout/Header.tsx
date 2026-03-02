@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Bell, Menu, Search, LogOut } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 const pageTitles: Record<string, string> = {
@@ -13,6 +13,7 @@ const pageTitles: Record<string, string> = {
   "/customers": "Khách hàng",
   "/inventory": "Quản lý kho",
   "/revenue": "Thống kê doanh thu",
+  "/api-explorer": "API Explorer",
 };
 
 interface HeaderProps {
@@ -62,20 +63,6 @@ export function Header({ onMenuToggle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 md:gap-3">
-        <div className="hidden md:flex items-center bg-brand-50 rounded-xl px-3 py-2 border border-brand-100 focus-within:border-brand-400 focus-within:ring-2 focus-within:ring-brand-400/20 transition-all">
-          <Search size={16} className="text-brand-400" strokeWidth={1.5} />
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            className="bg-transparent ml-2 text-sm text-brand-700 placeholder:text-brand-400 focus:outline-none w-44"
-          />
-        </div>
-
-        <button className="relative p-2 text-brand-500 hover:text-brand-700 hover:bg-brand-50 rounded-xl transition-colors">
-          <Bell size={20} strokeWidth={1.5} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-400 rounded-full ring-2 ring-white" />
-        </button>
-
         <div className="hidden sm:block h-8 w-px bg-brand-100" />
 
         {/* User menu */}

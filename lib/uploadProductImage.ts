@@ -1,4 +1,4 @@
-import imageCompression from "browser-image-compression";
+import imageCompression, { type Options as ImageCompressionOptions } from "browser-image-compression";
 import { supabase } from "@/lib/supabase/client";
 
 export interface UploadProductImageOptions {
@@ -22,7 +22,7 @@ export async function uploadProductImage(
     throw new Error("Kích thước ảnh vượt quá 5MB");
   }
 
-  const compressionOptions: imageCompression.Options = {
+  const compressionOptions: ImageCompressionOptions = {
     maxSizeMB: 1,
     maxWidthOrHeight: 1024,
     useWebWorker: true,
@@ -64,17 +64,14 @@ export async function uploadProductImage(
     options.onProgress(100);
   }
 
-  const {
-    data: publicData,
-    error: publicError,
-  } = supabase.storage.from("product-images").getPublicUrl(data.path);
+  const publicRes = supabase.storage
+    .from("product-images")
+    .getPublicUrl(data.path);
 
-  if (publicError || !publicData?.publicUrl) {
-    throw new Error(
-      publicError?.message ?? "Không thể lấy public URL của ảnh"
-    );
+  if (!publicRes?.data?.publicUrl) {
+    throw new Error("Không thể lấy public URL của ảnh");
   }
 
-  return publicData.publicUrl;
+  return publicRes.data.publicUrl;
 }
 

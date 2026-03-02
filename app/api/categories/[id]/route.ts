@@ -3,12 +3,15 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { updateCategorySchema } from "@/lib/validators";
 import { ok, fail, handleError, generateSlug } from "@/lib/api-helpers";
 
-type Params = { params: Promise<{ id: string }> };
+type Params = { params: { id: string } };
 
 // GET /api/categories/:id
-export async function GET(_request: NextRequest, { params }: Params) {
+export async function GET(
+  _request: NextRequest,
+  { params }: Params
+) {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     const { data, error } = await supabaseAdmin
       .from("categories")
@@ -17,7 +20,9 @@ export async function GET(_request: NextRequest, { params }: Params) {
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") return fail("Danh mục không tồn tại", 404);
+      if (error.code === "PGRST116") {
+        return fail("Danh mục không tồn tại", 404);
+      }
       return fail(error.message, 500);
     }
 
@@ -28,9 +33,12 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 // PUT /api/categories/:id
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(
+  request: NextRequest,
+  { params }: Params
+) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
     const validated = updateCategorySchema.parse(body);
 
@@ -46,8 +54,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") return fail("Danh mục không tồn tại", 404);
-      if (error.code === "23505") return fail("Slug đã tồn tại", 409);
+      if (error.code === "PGRST116") {
+        return fail("Danh mục không tồn tại", 404);
+      }
+      if (error.code === "23505") {
+        return fail("Slug đã tồn tại", 409);
+      }
       return fail(error.message, 500);
     }
 
@@ -58,9 +70,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/categories/:id
-export async function DELETE(_request: NextRequest, { params }: Params) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: Params
+) {
   try {
-    const { id } = await params;
+    const { id } = params;
 
     const { error } = await supabaseAdmin
       .from("categories")

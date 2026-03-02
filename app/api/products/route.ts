@@ -1,15 +1,15 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createProductSchema } from "@/lib/validators";
 import { ok, paginated, fail, handleError, parsePagination, toRange, buildPaginationMeta, generateSlug } from "@/lib/api-helpers";
 
 // GET /api/products — List products with variants + category, paginated
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const params = parsePagination(request.nextUrl.searchParams);
+    const { searchParams } = new URL(request.url);
+    const params = parsePagination(searchParams);
     const { from, to } = toRange(params);
-    const categoryId = request.nextUrl.searchParams.get("category_id");
-    const isActive = request.nextUrl.searchParams.get("is_active");
+    const categoryId = searchParams.get("category_id");
+    const isActive = searchParams.get("is_active");
 
     let query = supabaseAdmin
       .from("products")
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/products — Create product with optional variants
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = createProductSchema.parse(body);

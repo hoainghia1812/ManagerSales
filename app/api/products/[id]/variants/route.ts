@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createVariantSchema } from "@/lib/validators";
 import { ok, fail, handleError } from "@/lib/api-helpers";
@@ -6,7 +5,7 @@ import { ok, fail, handleError } from "@/lib/api-helpers";
 type Params = { params: Promise<{ id: string }> };
 
 // GET /api/products/:id/variants — List variants of a product
-export async function GET(_request: NextRequest, { params }: Params) {
+export async function GET(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
 
@@ -25,7 +24,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 // POST /api/products/:id/variants — Add variant to product
-export async function POST(request: NextRequest, { params }: Params) {
+export async function POST(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();

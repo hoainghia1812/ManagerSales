@@ -1,15 +1,15 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createInventoryLogSchema } from "@/lib/validators";
 import { ok, paginated, fail, handleError, parsePagination, toRange, buildPaginationMeta } from "@/lib/api-helpers";
 
 // GET /api/inventory — List inventory logs with variant info
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const params = parsePagination(request.nextUrl.searchParams);
+    const { searchParams } = new URL(request.url);
+    const params = parsePagination(searchParams);
     const { from, to } = toRange(params);
-    const changeType = request.nextUrl.searchParams.get("change_type");
-    const variantId = request.nextUrl.searchParams.get("variant_id");
+    const changeType = searchParams.get("change_type");
+    const variantId = searchParams.get("variant_id");
 
     let query = supabaseAdmin
       .from("inventory_logs")
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/inventory — Manual stock adjustment (restock / adjustment)
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = createInventoryLogSchema.parse(body);

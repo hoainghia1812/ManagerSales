@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createCustomerSchema } from "@/lib/validators";
 import { ok, paginated, fail, handleError, parsePagination, toRange, buildPaginationMeta } from "@/lib/api-helpers";
 
 // GET /api/customers — List customers with search + pagination
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const params = parsePagination(request.nextUrl.searchParams);
+    const { searchParams } = new URL(request.url);
+    const params = parsePagination(searchParams);
     const { from, to } = toRange(params);
 
     let query = supabaseAdmin
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/customers — Create a customer
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = createCustomerSchema.parse(body);

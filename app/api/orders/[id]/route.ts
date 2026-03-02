@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { updateOrderStatusSchema, updatePaymentStatusSchema } from "@/lib/validators";
 import { ok, fail, handleError } from "@/lib/api-helpers";
@@ -13,7 +12,7 @@ const updateOrderSchema = z.object({
 });
 
 // GET /api/orders/:id — Full order details
-export async function GET(_request: NextRequest, { params }: Params) {
+export async function GET(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
 
@@ -35,7 +34,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 // PUT /api/orders/:id — Update status / payment_status / note
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -73,7 +72,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/orders/:id — Delete order (triggers restore stock for items)
-export async function DELETE(_request: NextRequest, { params }: Params) {
+export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
 

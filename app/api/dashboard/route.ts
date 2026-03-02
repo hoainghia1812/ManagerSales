@@ -1,9 +1,8 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { ok, fail, handleError } from "@/lib/api-helpers";
 
 // GET /api/dashboard — Aggregated stats for dashboard
-export async function GET(_request: NextRequest) {
+export async function GET(_request: Request) {
   try {
     const [
       productsRes,

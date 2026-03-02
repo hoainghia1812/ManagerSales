@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { updatePaymentSchema } from "@/lib/validators";
 import { ok, fail, handleError } from "@/lib/api-helpers";
@@ -6,7 +5,7 @@ import { ok, fail, handleError } from "@/lib/api-helpers";
 type Params = { params: Promise<{ id: string }> };
 
 // GET /api/payments/:id
-export async function GET(_request: NextRequest, { params }: Params) {
+export async function GET(_request: Request, { params }: Params) {
   try {
     const { id } = await params;
 
@@ -28,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 // PUT /api/payments/:id — Update payment status
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const body = await request.json();

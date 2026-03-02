@@ -1,15 +1,15 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createOrderSchema } from "@/lib/validators";
 import { ok, paginated, fail, handleError, parsePagination, toRange, buildPaginationMeta } from "@/lib/api-helpers";
 
 // GET /api/orders — List orders with customer + items + payments
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const params = parsePagination(request.nextUrl.searchParams);
+    const { searchParams } = new URL(request.url);
+    const params = parsePagination(searchParams);
     const { from, to } = toRange(params);
-    const status = request.nextUrl.searchParams.get("status");
-    const paymentStatus = request.nextUrl.searchParams.get("payment_status");
+    const status = searchParams.get("status");
+    const paymentStatus = searchParams.get("payment_status");
 
     let query = supabaseAdmin
       .from("orders")
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/orders — Create order with items via RPC (atomic transaction)
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = createOrderSchema.parse(body);

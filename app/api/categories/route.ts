@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createCategorySchema } from "@/lib/validators";
 import { ok, paginated, fail, handleError, parsePagination, toRange, buildPaginationMeta, generateSlug } from "@/lib/api-helpers";
 
 // GET /api/categories — List categories with pagination
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const params = parsePagination(request.nextUrl.searchParams);
+    const { searchParams } = new URL(request.url);
+    const params = parsePagination(searchParams);
     const { from, to } = toRange(params);
 
     let query = supabaseAdmin
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/categories — Create a category
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = createCategorySchema.parse(body);

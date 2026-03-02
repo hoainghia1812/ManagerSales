@@ -1,14 +1,14 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { createPaymentSchema } from "@/lib/validators";
 import { ok, paginated, fail, handleError, parsePagination, toRange, buildPaginationMeta } from "@/lib/api-helpers";
 
 // GET /api/payments — List payments with pagination
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const params = parsePagination(request.nextUrl.searchParams);
+    const { searchParams } = new URL(request.url);
+    const params = parsePagination(searchParams);
     const { from, to } = toRange(params);
-    const orderId = request.nextUrl.searchParams.get("order_id");
+    const orderId = searchParams.get("order_id");
 
     let query = supabaseAdmin
       .from("payments")
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/payments — Record a payment + update order payment_status
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const validated = createPaymentSchema.parse(body);

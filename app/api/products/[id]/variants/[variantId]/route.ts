@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { updateVariantSchema } from "@/lib/validators";
 import { ok, fail, handleError } from "@/lib/api-helpers";
@@ -6,7 +5,7 @@ import { ok, fail, handleError } from "@/lib/api-helpers";
 type Params = { params: Promise<{ id: string; variantId: string }> };
 
 // PUT /api/products/:id/variants/:variantId
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(request: Request, { params }: Params) {
   try {
     const { id, variantId } = await params;
     const body = await request.json();
@@ -33,7 +32,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // DELETE /api/products/:id/variants/:variantId
-export async function DELETE(_request: NextRequest, { params }: Params) {
+export async function DELETE(_request: Request, { params }: Params) {
   try {
     const { id, variantId } = await params;
 

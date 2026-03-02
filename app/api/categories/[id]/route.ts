@@ -1,17 +1,16 @@
-import { NextRequest } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { updateCategorySchema } from "@/lib/validators";
 import { ok, fail, handleError, generateSlug } from "@/lib/api-helpers";
 
-type Params = { params: { id: string } };
+type CategoryParams = { params: Promise<{ id: string }> };
 
 // GET /api/categories/:id
 export async function GET(
-  _request: NextRequest,
-  { params }: Params
+  _request: Request,
+  { params }: CategoryParams
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const { data, error } = await supabaseAdmin
       .from("categories")
@@ -34,11 +33,11 @@ export async function GET(
 
 // PUT /api/categories/:id
 export async function PUT(
-  request: NextRequest,
-  { params }: Params
+  request: Request,
+  { params }: CategoryParams
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const validated = updateCategorySchema.parse(body);
 
@@ -71,11 +70,11 @@ export async function PUT(
 
 // DELETE /api/categories/:id
 export async function DELETE(
-  _request: NextRequest,
-  { params }: Params
+  _request: Request,
+  { params }: CategoryParams
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const { error } = await supabaseAdmin
       .from("categories")

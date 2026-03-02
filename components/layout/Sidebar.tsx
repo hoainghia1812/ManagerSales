@@ -10,12 +10,14 @@ import {
   Users,
   BarChart3,
   Warehouse,
+  Tag,
   X,
 } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/products", label: "Sản phẩm", icon: Package },
+  { href: "/categories", label: "Danh mục", icon: Tag },
   { href: "/orders", label: "Đơn hàng", icon: ShoppingBag },
   { href: "/customers", label: "Khách hàng", icon: Users },
   { href: "/inventory", label: "Kho hàng", icon: Warehouse },

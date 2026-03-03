@@ -58,9 +58,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Image
               src="/logo.png"
               alt="MUSH & CO."
-              width={36}
-              height={36}
-              className="rounded-lg brightness-200"
+              width={72}
+              height={72}
+              className="h-9 w-auto"
             />
             <div>
               <span className="font-serif text-base font-semibold text-brand-100 tracking-wide">

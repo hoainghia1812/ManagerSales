@@ -17,6 +17,11 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "MUSH & CO. | Quản lý bán hàng",
   description: "Hệ thống quản lý bán hàng thương hiệu handmade cao cấp MUSH & CO.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

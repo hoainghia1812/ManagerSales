@@ -18,10 +18,12 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [existingUser, setExistingUser] = useState(false);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setExistingUser(false);
 
     if (password.length < 6) {
       setError("Mật khẩu phải có ít nhất 6 ký tự");
@@ -36,6 +38,23 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      // Supabase signUp intentionally does not reliably tell if email exists.
+      // So we check existence via server-side route (service role) first.
+      try {
+        const res = await fetch(
+          `/api/auth/check-email?email=${encodeURIComponent(email.trim().toLowerCase())}`
+        );
+        if (res.ok) {
+          const json = (await res.json()) as { exists?: boolean };
+          if (json.exists) {
+            setExistingUser(true);
+            return;
+          }
+        }
+      } catch {
+        // ignore and continue with signUp
+      }
+
       const { error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -48,7 +67,7 @@ export default function RegisterPage() {
 
       if (authError) {
         if (authError.message.includes("already registered")) {
-          setError("Email này đã được đăng ký");
+          setExistingUser(true);
         } else {
           setError(authError.message);
         }
@@ -61,6 +80,41 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (existingUser) {
+    return (
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 size={32} className="text-amber-500" />
+        </div>
+        <h2 className="font-serif text-2xl font-bold text-brand-700 mb-2">
+          Email đã có tài khoản
+        </h2>
+        <p className="text-brand-500 mb-6">
+          Tài khoản với email{" "}
+          <span className="font-medium text-brand-700 break-all">{email}</span>{" "}
+          đã tồn tại. Vui lòng đăng nhập để tiếp tục.
+        </p>
+        <Button
+          fullWidth
+          onClick={() => router.push("/login")}
+          className="mb-3"
+        >
+          Đến trang đăng nhập
+        </Button>
+        <button
+          type="button"
+          className="text-sm text-brand-400 hover:text-brand-700 transition-colors"
+          onClick={() => {
+            setExistingUser(false);
+            setError("");
+          }}
+        >
+          Quay lại đăng ký với email khác
+        </button>
+      </div>
+    );
   }
 
   if (success) {

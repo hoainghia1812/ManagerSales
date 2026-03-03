@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+
+const AUTH_EXPIRES_AT_KEY = "ms_auth_expires_at";
+const AUTH_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 export default function AdminLayout({
   children,
@@ -14,25 +17,114 @@ export default function AdminLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [checking, setChecking] = useState(true);
+  const logoutTimerRef = useRef<number | null>(null);
+
+  function clearLogoutTimer() {
+    if (logoutTimerRef.current !== null) {
+      window.clearTimeout(logoutTimerRef.current);
+      logoutTimerRef.current = null;
+    }
+  }
+
+  function getExpiresAt(): number | null {
+    try {
+      const raw = localStorage.getItem(AUTH_EXPIRES_AT_KEY);
+      if (!raw) return null;
+      const ms = Number(raw);
+      return Number.isFinite(ms) ? ms : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function setExpiresAt(ms: number) {
+    try {
+      localStorage.setItem(AUTH_EXPIRES_AT_KEY, String(ms));
+    } catch {
+      // ignore
+    }
+  }
+
+  function clearExpiresAt() {
+    try {
+      localStorage.removeItem(AUTH_EXPIRES_AT_KEY);
+    } catch {
+      // ignore
+    }
+  }
+
+  function scheduleAutoLogout(expiresAt: number) {
+    clearLogoutTimer();
+    const msLeft = Math.max(0, expiresAt - Date.now());
+    logoutTimerRef.current = window.setTimeout(() => {
+      void (async () => {
+        try {
+          await supabase.auth.signOut();
+        } finally {
+          clearExpiresAt();
+          router.replace("/login");
+          router.refresh();
+        }
+      })();
+    }, msLeft);
+  }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let cancelled = false;
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (cancelled) return;
+
       if (!session) {
+        clearLogoutTimer();
+        clearExpiresAt();
         router.replace("/login");
-      } else {
-        setChecking(false);
+        return;
       }
+
+      const existingExpiresAt = getExpiresAt();
+      const expiresAt = existingExpiresAt ?? Date.now() + AUTH_TTL_MS;
+
+      if (!existingExpiresAt) {
+        setExpiresAt(expiresAt);
+      }
+
+      if (Date.now() >= expiresAt) {
+        clearLogoutTimer();
+        clearExpiresAt();
+        await supabase.auth.signOut();
+        router.replace("/login");
+        return;
+      }
+
+      scheduleAutoLogout(expiresAt);
+      setChecking(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!session) {
+      (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          const expiresAt = Date.now() + AUTH_TTL_MS;
+          setExpiresAt(expiresAt);
+          scheduleAutoLogout(expiresAt);
+          setChecking(false);
+          return;
+        }
+
+        if (!session || event === "SIGNED_OUT") {
+          clearLogoutTimer();
+          clearExpiresAt();
           router.replace("/login");
+          router.refresh();
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      clearLogoutTimer();
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   if (checking) {

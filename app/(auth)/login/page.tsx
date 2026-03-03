@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 
+const AUTH_EXPIRES_AT_KEY = "ms_auth_expires_at";
+const AUTH_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -15,10 +18,13 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setInfo("");
     setLoading(true);
 
     try {
@@ -38,12 +44,55 @@ export default function LoginPage() {
         return;
       }
 
+      try {
+        const expiresAt = Date.now() + AUTH_TTL_MS;
+        localStorage.setItem(AUTH_EXPIRES_AT_KEY, String(expiresAt));
+      } catch {
+        // ignore (storage may be blocked)
+      }
+
       router.push("/dashboard");
       router.refresh();
     } catch {
       setError("Đã xảy ra lỗi, vui lòng thử lại");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    setError("");
+    setInfo("");
+
+    if (!email) {
+      setError("Vui lòng nhập email trước khi đặt lại mật khẩu");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/reset-password`
+          : undefined;
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo ? { redirectTo } : undefined
+      );
+
+      if (resetError) {
+        setError(resetError.message);
+        return;
+      }
+
+      setInfo(
+        "Đã gửi email đặt lại mật khẩu. Vui lòng kiểm tra hộp thư của bạn."
+      );
+    } catch {
+      setError("Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.");
+    } finally {
+      setResetLoading(false);
     }
   }
 
@@ -62,6 +111,11 @@ export default function LoginPage() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
             {error}
+          </div>
+        )}
+        {!error && info && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-3">
+            {info}
           </div>
         )}
 
@@ -94,11 +148,22 @@ export default function LoginPage() {
           </button>
         </div>
 
+        <div className="flex items-center justify-between text-sm">
+          <button
+            type="button"
+            onClick={() => void handleForgotPassword()}
+            className="text-brand-400 hover:text-brand-700 font-medium transition-colors"
+            disabled={resetLoading || loading}
+          >
+            {resetLoading ? "Đang gửi link đặt lại..." : "Quên mật khẩu?"}
+          </button>
+        </div>
+
         <Button
           type="submit"
           fullWidth
           size="lg"
-          disabled={loading}
+          disabled={loading || resetLoading}
           icon={<LogIn size={18} />}
           className="mt-2"
         >

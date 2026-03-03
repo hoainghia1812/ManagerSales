@@ -19,10 +19,10 @@ export default function AuthLayout({
         <div className="relative z-10 text-center">
           <Image
             src="/logo.png"
-            alt="MUSH&CO."
-            width={80}
-            height={80}
-            className="mx-auto rounded-2xl brightness-200 mb-6"
+            alt="MUSH & CO."
+            width={480}
+            height={480}
+            className="mx-auto mb-6 h-60 w-auto"
           />
           <h1 className="font-serif text-4xl font-bold text-brand-100 tracking-wide">
             MUSH&CO.
@@ -45,10 +45,10 @@ export default function AuthLayout({
           <Link href="/" className="inline-flex flex-col items-center gap-2">
             <Image
               src="/logo.png"
-              alt="MUSH&CO."
-              width={56}
-              height={56}
-              className="rounded-xl"
+              alt="MUSH & CO."
+              width={336}
+              height={336}
+              className="h-[10.5rem] w-auto"
             />
             <span className="font-serif text-xl font-bold text-brand-700 tracking-wide">
               MUSH&CO.
